@@ -80,9 +80,10 @@ class MyAppState extends State<MyApp> {
                   Tab(icon: Image.asset("assets/ja_flag.png")),
                 ],
               ),
-              title: Text('MARKET ANALYSIS'),
+              leading: Image.asset("assets/logo.png"),
+              title: Text('MARKET ANALYSIS', style: TextStyle(color: Colors.green),),
               centerTitle: true,
-              backgroundColor: Colors.blueGrey,
+              backgroundColor: Colors.white,
             ),
             body: TabBarView(
               children: [
