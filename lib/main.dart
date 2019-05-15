@@ -13,34 +13,34 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  List _countries = ["Trinidad and Tobago", "Barbados", "Guyana", "Jamaica"];
+
   List _commoditiesTT = ["Cassava", "Local Dasheen", "Imported Dasheen", "Local sweet pepper", "Imported sweet pepper", "Hot pepper"];
   List _commoditiesJA = ["Dasheen", "Sweet pepper", "Hot pepper"];
   List _commoditiesBB = ["Cassava", "Sweet pepper", "Hot pepper"];
   List _commoditiesGY = ["Cassava", "Sweet pepper", "Hot pepper"];
+  List _months = ["January", "February", "March", "April", "May"];
 
-
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<DropdownMenuItem<String>> _dropDownMenuBB;
   List<DropdownMenuItem<String>> _dropDownMenuGY;
   List<DropdownMenuItem<String>> _dropDownMenuTT;
   List<DropdownMenuItem<String>> _dropDownMenuJA;
-  List<DropdownMenuItem<String>> _dropDownMenuSelected;
+  List<DropdownMenuItem<String>> _dropDownMenuMonths;
 
-  String _selectedCountry;
   String _selectedCommodity;
-
-  SimpleBarChart b = new SimpleBarChart.withSampleData();
+  String _selectedMonth;
 
   @override
   void initState() {
-    _dropDownMenuItems = buildAndGetDropDownMenuItems(_countries);
+
     _dropDownMenuBB = buildAndGetDropDownMenuItems(_commoditiesBB);
     _dropDownMenuTT = buildAndGetDropDownMenuItems(_commoditiesTT);
     _dropDownMenuGY = buildAndGetDropDownMenuItems(_commoditiesGY);
     _dropDownMenuJA = buildAndGetDropDownMenuItems(_commoditiesJA);
-    _selectedCountry = _dropDownMenuItems[0].value;
-    _selectedCommodity = _dropDownMenuTT[0].value;
+    _dropDownMenuMonths = buildAndGetDropDownMenuItems(_months);
+
+    _selectedCommodity = "Hot pepper";
+    _selectedMonth = "January";
+
     super.initState();
   }
 
@@ -52,46 +52,24 @@ class MyAppState extends State<MyApp> {
     return items;
   }
 
-  void changedDropDownItem(String selectedFruit) {
+  void changedDropDownItem(String selected) {
     setState(() {
-      _selectedCountry = selectedFruit;
+      _selectedMonth = selected;
     });
   }
 
-  void changedDropDownItem2(String selectedFruit) {
+  void changedDropDownItem2(String selectedCommodity) {
     setState(() {
-      _selectedCommodity = selectedFruit;
+      _selectedCommodity = selectedCommodity;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedCountry == _dropDownMenuItems[0].value){
-      _dropDownMenuSelected = _dropDownMenuTT;
-    }
-    else if (_selectedCountry == _dropDownMenuItems[1].value){
-      _dropDownMenuSelected = _dropDownMenuBB;
-    }
-    else if (_selectedCountry == _dropDownMenuItems[2].value){
-      _dropDownMenuSelected = _dropDownMenuGY;
-    }
-    else if (_selectedCountry == _dropDownMenuItems[3].value){
-      _dropDownMenuSelected = _dropDownMenuJA;
-    }
-
-//    return new MaterialApp(
-//      debugShowCheckedModeBanner: false,
-//      home: new Scaffold(
-//        appBar: new AppBar(
-//          title: new Text("MARKET ANALYSIS"),
-//          centerTitle: true,
-//          backgroundColor: Colors.blueGrey,
-//        ),
-//        body: new SimpleBarChart.withSampleData(),
-
       return MaterialApp(
-        home: DefaultTabController(
-          length: 3,
+          debugShowCheckedModeBanner: false,
+          home: DefaultTabController(
+          length: 4,
           child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
@@ -108,60 +86,176 @@ class MyAppState extends State<MyApp> {
             ),
             body: TabBarView(
               children: [
-//                Icon(Icons.directions_car),
-                new SimpleBarChart.withSampleData(),
-
-                new DropdownButton(
-                    value: _selectedCommodity,
-                    items: _dropDownMenuSelected,
-                    onChanged: changedDropDownItem2,
+                // Tab 1
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[
+                          new Text("Trinidad and Tobago"),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedCommodity,
+                                  items: _dropDownMenuTT,
+                                  onChanged: changedDropDownItem2,
+                                ),
+                              ),
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedMonth,
+                                  items: _dropDownMenuMonths,
+                                  onChanged: changedDropDownItem,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: charts.BarChart(_createSampleData(), animate: true),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                ),
 
-                Icon(Icons.directions_transit),
+                //Tab 2
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[
+                          new Text("Barbados"),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedCommodity,
+                                  items: _dropDownMenuBB,
+                                  onChanged: changedDropDownItem2,
+                                ),
+                              ),
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedMonth,
+                                  items: _dropDownMenuMonths,
+                                  onChanged: changedDropDownItem,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: charts.BarChart(_createSampleData(), animate: true),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
-                Icon(Icons.directions_bike),
+                // Tab 3
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[
+                          new Text("Guyana"),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                              child: new DropdownButton(
+                                value: _selectedCommodity,
+                                items: _dropDownMenuGY,
+                                onChanged: changedDropDownItem2,
+                              ),
+                              ),
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedMonth,
+                                  items: _dropDownMenuMonths,
+                                  onChanged: changedDropDownItem,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: charts.BarChart(_createSampleData(), animate: true),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Tab 4
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[
+                          new Text("Jamaica"),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedCommodity,
+                                  items: _dropDownMenuJA,
+                                  onChanged: changedDropDownItem2,
+                                ),
+                              ),
+                              Expanded(
+                                child: new DropdownButton(
+                                  value: _selectedMonth,
+                                  items: _dropDownMenuMonths,
+                                  onChanged: changedDropDownItem,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: charts.BarChart(_createSampleData(), animate: true),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
               ],
             ),
           ),
         )
-
-// ListView(children: [
-//          Padding(
-//            padding: EdgeInsets.all(8.0),
-//            child: Container(
-//              child: Center(
-//                child: Column(
-//                  children: <Widget>[
-//                    Text("Trinidad and Tobago"),
-//                    Expanded(
-//                      child: new SimpleBarChart.withSampleData(),
-//                    ),
-//                  ],
-//                ),
-//              ),
-//            ),
-//          ),
-//        ]),
-
-
-
-
-//        Center(
-//                child: new Column( children: <Widget>[
-//                  new DropdownButton(
-//                    value: _selectedCountry,
-//                    items: _dropDownMenuItems,
-//                    onChanged: changedDropDownItem,
-//                  ),
-//                  new DropdownButton(
-//                    value: _selectedCommodity,
-//                    items: _dropDownMenuSelected,
-//                    onChanged: changedDropDownItem2,
-//                  ),
-//                  SimpleBarChart.withSampleData(),
-//                ],
-//                ),
-//              ),
       );
   }
+
+  static List<charts.Series<OrdinalSales, String>> _createSampleData() {
+    final data = [
+      new OrdinalSales('Week 1', 20),
+      new OrdinalSales('Week 2', 25),
+      new OrdinalSales('Week 3', 30),
+      new OrdinalSales('Week 4', 25),
+    ];
+
+    return [
+      new charts.Series<OrdinalSales, String>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (OrdinalSales sales, _) => sales.year,
+        measureFn: (OrdinalSales sales, _) => sales.sales,
+        data: data,
+      )
+    ];
+  }
+}
+
+class OrdinalSales {
+  final String year;
+  final int sales;
+
+  OrdinalSales(this.year, this.sales);
 }
