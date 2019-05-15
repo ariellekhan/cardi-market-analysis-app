@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'bar_chart.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 void main() => runApp(new MyApp());
+
 
 class MyApp extends StatefulWidget {
   @override
@@ -26,6 +29,8 @@ class MyAppState extends State<MyApp> {
 
   String _selectedCountry;
   String _selectedCommodity;
+
+  SimpleBarChart b = new SimpleBarChart.withSampleData();
 
   @override
   void initState() {
@@ -74,34 +79,89 @@ class MyAppState extends State<MyApp> {
       _dropDownMenuSelected = _dropDownMenuJA;
     }
 
-    return new MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: new Scaffold(
-        appBar: new AppBar(
-          title: new Text("MARKET ANALYSIS"),
-          centerTitle: true,
-          backgroundColor: Colors.blueGrey,
-        ),
-        body: new Container(
-          child: new Center(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.spaceAround ,
-                children: <Widget>[
-                  new DropdownButton(
-                    value: _selectedCountry,
-                    items: _dropDownMenuItems,
-                    onChanged: changedDropDownItem,
-                  ),
-                  new DropdownButton(
+//    return new MaterialApp(
+//      debugShowCheckedModeBanner: false,
+//      home: new Scaffold(
+//        appBar: new AppBar(
+//          title: new Text("MARKET ANALYSIS"),
+//          centerTitle: true,
+//          backgroundColor: Colors.blueGrey,
+//        ),
+//        body: new SimpleBarChart.withSampleData(),
+
+      return MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: [
+                  Tab(icon: Image.asset("assets/tt_flag.png")),
+                  Tab(icon: Image.asset("assets/bb_flag.png")),
+                  Tab(icon: Image.asset("assets/gy_flag.png")),
+                  Tab(icon: Image.asset("assets/ja_flag.png")),
+                ],
+              ),
+              title: Text('MARKET ANALYSIS'),
+              centerTitle: true,
+              backgroundColor: Colors.blueGrey,
+            ),
+            body: TabBarView(
+              children: [
+//                Icon(Icons.directions_car),
+                new SimpleBarChart.withSampleData(),
+
+                new DropdownButton(
                     value: _selectedCommodity,
                     items: _dropDownMenuSelected,
                     onChanged: changedDropDownItem2,
-                  )
-                ],
-              )),
-        ),
-      ),
-    );
+                  ),
+
+                Icon(Icons.directions_transit),
+
+                Icon(Icons.directions_bike),
+              ],
+            ),
+          ),
+        )
+
+// ListView(children: [
+//          Padding(
+//            padding: EdgeInsets.all(8.0),
+//            child: Container(
+//              child: Center(
+//                child: Column(
+//                  children: <Widget>[
+//                    Text("Trinidad and Tobago"),
+//                    Expanded(
+//                      child: new SimpleBarChart.withSampleData(),
+//                    ),
+//                  ],
+//                ),
+//              ),
+//            ),
+//          ),
+//        ]),
+
+
+
+
+//        Center(
+//                child: new Column( children: <Widget>[
+//                  new DropdownButton(
+//                    value: _selectedCountry,
+//                    items: _dropDownMenuItems,
+//                    onChanged: changedDropDownItem,
+//                  ),
+//                  new DropdownButton(
+//                    value: _selectedCommodity,
+//                    items: _dropDownMenuSelected,
+//                    onChanged: changedDropDownItem2,
+//                  ),
+//                  SimpleBarChart.withSampleData(),
+//                ],
+//                ),
+//              ),
+      );
   }
 }
