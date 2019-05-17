@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "102504656318",
+    "firebase_url": "https://market-analysis-d72b9.firebaseio.com",
+    "project_id": "market-analysis-d72b9",
+    "storage_bucket": "market-analysis-d72b9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:102504656318:android:7bd71543f89d056a",
+        "android_client_info": {
+          "package_name": "com.example.flutterapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "102504656318-eoe4n6jm4rqkbnnb3u179nbcli4voi5t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbK1aPPfh6ebeJbQRmbh9tzJa3hmrI2NM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "102504656318-eoe4n6jm4rqkbnnb3u179nbcli4voi5t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

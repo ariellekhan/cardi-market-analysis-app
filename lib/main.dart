@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'bar_chart.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:firebase_database/firebase_database.dart';
 
 void main() => runApp(new MyApp());
 
@@ -13,37 +13,61 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+  // Realtime database
+  final FirebaseDatabase database = FirebaseDatabase.instance;
+  DatabaseReference databaseReference;
 
-  List _commoditiesTT = ["Cassava", "Local Dasheen", "Imported Dasheen", "Local sweet pepper", "Imported sweet pepper", "Hot pepper"];
-  List _commoditiesJA = ["Dasheen", "Sweet pepper", "Hot pepper"];
-  List _commoditiesBB = ["Cassava", "Sweet pepper", "Hot pepper"];
-  List _commoditiesGY = ["Cassava", "Sweet pepper", "Hot pepper"];
-  List _months = ["January", "February", "March", "April", "May"];
-
+  // Commodity dropdown lists
+  List _commoditiesTT = ["Cassava", "Local dasheen", "Imported dasheen", "Local sweet potato", "Imported sweet potato", "Hot pepper"];
+  List _commoditiesJA = ["Dasheen", "Sweet potato", "Scotch bonnet", "West Indian red"];
+  List _commoditiesBB = ["Cassava", "Sweet potato", "Hot pepper"];
+  List _commoditiesGY = ["Cassava", "Sweet potato", "Hot pepper"];
+  List _months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October","November", "December"];
   List<DropdownMenuItem<String>> _dropDownMenuBB;
   List<DropdownMenuItem<String>> _dropDownMenuGY;
   List<DropdownMenuItem<String>> _dropDownMenuTT;
   List<DropdownMenuItem<String>> _dropDownMenuJA;
   List<DropdownMenuItem<String>> _dropDownMenuMonths;
+  String _selectedCommodityTT;
+  String _selectedCommodityBB;
+  String _selectedCommodityGY;
+  String _selectedCommodityJA;
+  String _selectedMonthTT;
+  String _selectedMonthBB;
+  String _selectedMonthGY;
+  String _selectedMonthJA;
+  charts.BarChart chartTT;
 
-  String _selectedCommodity;
-  String _selectedMonth;
 
   @override
   void initState() {
 
+    // Dropdowns
     _dropDownMenuBB = buildAndGetDropDownMenuItems(_commoditiesBB);
     _dropDownMenuTT = buildAndGetDropDownMenuItems(_commoditiesTT);
     _dropDownMenuGY = buildAndGetDropDownMenuItems(_commoditiesGY);
     _dropDownMenuJA = buildAndGetDropDownMenuItems(_commoditiesJA);
     _dropDownMenuMonths = buildAndGetDropDownMenuItems(_months);
+    _selectedCommodityTT = _commoditiesTT[0];
+    _selectedCommodityBB = _commoditiesBB[0];
+    _selectedCommodityGY = _commoditiesGY[0];
+    _selectedCommodityJA = _commoditiesJA[0];
+    _selectedMonthTT = _months[0];
+    _selectedMonthBB = _months[0];
+    _selectedMonthGY = _months[0];
+    _selectedMonthJA = _months[0];
 
-    _selectedCommodity = "Hot pepper";
-    _selectedMonth = "January";
+    // Database
+    database.setPersistenceEnabled(true);
+    database.setPersistenceCacheSizeBytes(10000000); //allocating 10MB of storage in cache for pest Data
+    databaseReference = database.reference();
+    databaseReference.onChildAdded.listen(_onEntryAdded); //listening for new data added
+    databaseReference.onChildChanged.listen(_onEntryChanged);
 
     super.initState();
   }
 
+  // Functions for dropdowns
   List<DropdownMenuItem<String>> buildAndGetDropDownMenuItems(List fruits) {
     List<DropdownMenuItem<String>> items = new List();
     for (String fruit in fruits) {
@@ -52,20 +76,59 @@ class MyAppState extends State<MyApp> {
     return items;
   }
 
-  void changedDropDownItem(String selected) {
+  void changedDropDownItemMonthTT(String selected) {
     setState(() {
-      _selectedMonth = selected;
+      _selectedMonthTT = selected;
     });
   }
 
-  void changedDropDownItem2(String selectedCommodity) {
+  void changedDropDownItemMonthBB(String selected) {
     setState(() {
-      _selectedCommodity = selectedCommodity;
+      _selectedMonthBB = selected;
     });
   }
+
+  void changedDropDownItemMonthGY(String selected) {
+    setState(() {
+      _selectedMonthGY = selected;
+    });
+  }
+
+  void changedDropDownItemMonthJA(String selected) {
+    setState(() {
+      _selectedMonthJA = selected;
+    });
+  }
+
+  void changedDropDownItemTT(String selectedCommodity) {
+    setState(() {
+      _selectedCommodityTT = selectedCommodity;
+    });
+  }
+
+  void changedDropDownItemBB(String selectedCommodity) {
+    setState(() {
+      _selectedCommodityBB = selectedCommodity;
+    });
+  }
+  void changedDropDownItemGY(String selectedCommodity) {
+    setState(() {
+      _selectedCommodityGY = selectedCommodity;
+    });
+  }
+  void changedDropDownItemJA(String selectedCommodity) {
+    setState(() {
+      _selectedCommodityJA = selectedCommodity;
+    });
+  }
+  // End of functions for dropdowns
+
+
 
   @override
   Widget build(BuildContext context) {
+    chartTT = charts.BarChart(_createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT), animate: true,);
+
       return MaterialApp(
           debugShowCheckedModeBanner: false,
           home: DefaultTabController(
@@ -85,9 +148,10 @@ class MyAppState extends State<MyApp> {
               centerTitle: true,
               backgroundColor: Colors.white,
             ),
+
             body: TabBarView(
               children: [
-                // Tab 1
+                // Tab 1 TT
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -99,30 +163,32 @@ class MyAppState extends State<MyApp> {
                             children: <Widget>[
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedCommodity,
+                                  value: _selectedCommodityTT,
                                   items: _dropDownMenuTT,
-                                  onChanged: changedDropDownItem2,
+                                  onChanged: changedDropDownItemTT,
                                 ),
                               ),
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedMonth,
+                                  value: _selectedMonthTT,
                                   items: _dropDownMenuMonths,
-                                  onChanged: changedDropDownItem,
+                                  onChanged: changedDropDownItemMonthTT,
                                 ),
                               ),
                             ],
                           ),
                           Expanded(
-                            child: charts.BarChart(_createSampleData(), animate: true),
+                            // child: charts.BarChart(_createSampleData(), animate: true),
+                            child: charts.BarChart(_createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT), animate: true,),
                           ),
+                          Text("Currency: \$TTD"),
                         ],
                       ),
                     ),
                   ),
                 ),
 
-                //Tab 2
+                //Tab 2 BB
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -134,30 +200,32 @@ class MyAppState extends State<MyApp> {
                             children: <Widget>[
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedCommodity,
+                                  value: _selectedCommodityBB,
                                   items: _dropDownMenuBB,
-                                  onChanged: changedDropDownItem2,
+                                  onChanged: changedDropDownItemBB,
                                 ),
                               ),
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedMonth,
+                                  value: _selectedMonthBB,
                                   items: _dropDownMenuMonths,
-                                  onChanged: changedDropDownItem,
+                                  onChanged: changedDropDownItemMonthBB,
                                 ),
                               ),
                             ],
                           ),
                           Expanded(
-                            child: charts.BarChart(_createSampleData(), animate: true),
+                            // child: charts.BarChart(_createSampleData(), animate: true),
+                            child: charts.BarChart(_createChartBB("barbados", _selectedCommodityBB, _selectedMonthBB)),
                           ),
+                          Text("Currency: \$BBD"),
                         ],
                       ),
                     ),
                   ),
                 ),
 
-                // Tab 3
+                // Tab 3 GY
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -169,30 +237,32 @@ class MyAppState extends State<MyApp> {
                             children: <Widget>[
                               Expanded(
                               child: new DropdownButton(
-                                value: _selectedCommodity,
+                                value: _selectedCommodityGY,
                                 items: _dropDownMenuGY,
-                                onChanged: changedDropDownItem2,
+                                onChanged: changedDropDownItemGY,
                               ),
                               ),
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedMonth,
+                                  value: _selectedMonthGY,
                                   items: _dropDownMenuMonths,
-                                  onChanged: changedDropDownItem,
+                                  onChanged: changedDropDownItemMonthGY,
                                 ),
                               ),
                             ],
                           ),
                           Expanded(
-                            child: charts.BarChart(_createSampleData(), animate: true),
+//                            child: charts.BarChart(_createSampleData(), animate: true),
+                              child: charts.BarChart(_createChartGY("guyana", _selectedCommodityGY, _selectedMonthGY)),
                           ),
+                          Text("Currency: \$GY"),
                         ],
                       ),
                     ),
                   ),
                 ),
 
-                // Tab 4
+                // Tab 4 JA
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -204,23 +274,25 @@ class MyAppState extends State<MyApp> {
                             children: <Widget>[
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedCommodity,
+                                  value: _selectedCommodityJA,
                                   items: _dropDownMenuJA,
-                                  onChanged: changedDropDownItem2,
+                                  onChanged: changedDropDownItemJA,
                                 ),
                               ),
                               Expanded(
                                 child: new DropdownButton(
-                                  value: _selectedMonth,
+                                  value: _selectedMonthJA,
                                   items: _dropDownMenuMonths,
-                                  onChanged: changedDropDownItem,
+                                  onChanged: changedDropDownItemMonthJA,
                                 ),
                               ),
                             ],
                           ),
                           Expanded(
-                            child: charts.BarChart(_createSampleData(), animate: true),
+//                            child: charts.BarChart(_createSampleData(), animate: true),
+                              child: charts.BarChart(_createChartJA("jamaica", _selectedCommodityJA, _selectedMonthJA)),
                           ),
+                          Text("Currency: \$JCA"),
                         ],
                       ),
                     ),
@@ -234,29 +306,239 @@ class MyAppState extends State<MyApp> {
       );
   }
 
-  static List<charts.Series<OrdinalSales, String>> _createSampleData() {
-    final data = [
-      new OrdinalSales('Week 1', 20),
-      new OrdinalSales('Week 2', 25),
-      new OrdinalSales('Week 3', 30),
-      new OrdinalSales('Week 4', 25),
-    ];
 
+  // Function which takes the name of the country, commodity and month and returns a series to build a chart
+  List<charts.Series<Data, String>> _createChartTT(String _country, String _commodity, String _month) {
+    String _date;
+    String _price;
+    int x;
+    List<Data> dataTT = [];
+
+    _commodity = changeCommodity(_commodity);
+    _month = changeMonth(_month);
+
+    for (x=1; x<=5; x++){
+      // point database to week
+      String _week = "week"+x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      // get snapshot
+      databaseReference.once().then((DataSnapshot snapshot) {
+        if(snapshot.value == null){
+          _date = "";
+          _price = "0.0";
+        }
+        else{
+          print('Data : ${snapshot.value}');
+          _date = snapshot.value['date'];
+          _price = snapshot.value['price'];
+          dataTT.add(new Data(_date, double.parse(_price)));
+          print(_date);
+          print(_price);
+        }
+      });
+    }
+
+    // use data to build a chart series
     return [
-      new charts.Series<OrdinalSales, String>(
+      new charts.Series<Data, String>(
         id: 'Sales',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (OrdinalSales sales, _) => sales.year,
-        measureFn: (OrdinalSales sales, _) => sales.sales,
-        data: data,
+        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
+        domainFn: (Data sales, _) => sales._date,
+        measureFn: (Data sales, _) => sales._price,
+        data: dataTT,
       )
     ];
   }
+
+  // Function which takes the name of the country, commodity and month and returns a series to build a chart
+  List<charts.Series<Data, String>> _createChartBB(String _country, String _commodity, String _month) {
+    String _date;
+    String _price;
+    int x;
+    List<Data> dataBB = [];
+
+    _commodity = changeCommodity(_commodity);
+    _month = changeMonth(_month);
+
+    for (x=1; x<=5; x++){
+      // point database to week
+      String _week = "week"+x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      // get snapshot
+      databaseReference.once().then((DataSnapshot snapshot) {
+        if(snapshot.value == null){
+          _date = "";
+          _price = "0.0";
+        }
+        else{
+          print('Data : ${snapshot.value}');
+          _date = snapshot.value['date'];
+          _price = snapshot.value['price'];
+          dataBB.add(new Data(_date, double.parse(_price)));
+          print(_date);
+          print(_price);
+        }
+      });
+    }
+
+    // use data to build a chart series
+    return [
+      new charts.Series<Data, String>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (Data sales, _) => sales._date,
+        measureFn: (Data sales, _) => sales._price,
+        data: dataBB,
+      )
+    ];
+  }
+
+  // Function which takes the name of the country, commodity and month and returns a series to build a chart
+  List<charts.Series<Data, String>> _createChartGY(String _country, String _commodity, String _month) {
+    String _date;
+    String _price;
+    int x;
+    List<Data> dataGY = [];
+
+    _commodity = changeCommodity(_commodity);
+    _month = changeMonth(_month);
+
+    for (x=1; x<=5; x++){
+      // point database to week
+      String _week = "week"+x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      // get snapshot
+      databaseReference.once().then((DataSnapshot snapshot) {
+        if(snapshot.value == null){
+          _date = "";
+          _price = "0.0";
+        }
+        else{
+          print('Data : ${snapshot.value}');
+          _date = snapshot.value['date'];
+          _price = snapshot.value['price'];
+          dataGY.add(new Data(_date, double.parse(_price)));
+          print(_date);
+          print(_price);
+        }
+      });
+    }
+
+    // use data to build a chart series
+    return [
+      new charts.Series<Data, String>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.yellow.shadeDefault,
+        domainFn: (Data sales, _) => sales._date,
+        measureFn: (Data sales, _) => sales._price,
+        data: dataGY,
+      )
+    ];
+  }
+
+  // Function which takes the name of the country, commodity and month and returns a series to build a chart
+  List<charts.Series<Data, String>> _createChartJA(String _country, String _commodity, String _month) {
+    String _date;
+    String _price;
+    int x;
+    List<Data> dataJA = [];
+
+    _commodity = changeCommodity(_commodity);
+    _month = changeMonth(_month);
+
+    for (x=1; x<=5; x++){
+      // point database to week
+      String _week = "week"+x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      // get snapshot
+      databaseReference.once().then((DataSnapshot snapshot) {
+        if(snapshot.value == null){
+          _date = "";
+          _price = "0.0";
+        }
+        else{
+          print('Data : ${snapshot.value}');
+          _date = snapshot.value['date'];
+          _price = snapshot.value['price'];
+          dataJA.add(new Data(_date, double.parse(_price)));
+          print(_date);
+          print(_price);
+        }
+      });
+    }
+
+    // use data to build a chart series
+    return [
+      new charts.Series<Data, String>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+        domainFn: (Data sales, _) => sales._date,
+        measureFn: (Data sales, _) => sales._price,
+        data: dataJA,
+      )
+    ];
+  }
+
+String changeCommodity(String _commodity){
+  // match commodity name to value stored in database
+  if (_commodity == "Cassava") _commodity = "cassava";
+  if (_commodity == "Local dasheen") _commodity = "dasheen";
+  if (_commodity == "Imported dasheen") _commodity = "dasheen1";
+  if (_commodity == "Local sweet potato") _commodity = "sweetPotato";
+  if (_commodity == "Imported sweet potato") _commodity = "sweetPotato1";
+  if (_commodity == "Sweet potato") _commodity = "sweetPotato";
+  if (_commodity == "Dasheen") _commodity = "dasheen";
+  if (_commodity == "Hot pepper") _commodity = "hotPeppers";
+  if (_commodity == "Scotch bonnet") _commodity = "scotchBonnet";
+  if (_commodity == "West Indian red") _commodity = "westIndianRed";
+
+  return _commodity;
 }
 
-class OrdinalSales {
-  final String year;
-  final int sales;
+String changeMonth(String _month){
+    if (_month == "January") _month = "january";
+    if (_month == "February") _month = "february";
+    if (_month == "March") _month = "march";
+    if (_month == "April") _month = "april";
+    if (_month == "May") _month = "may";
+    if (_month == "June") _month = "june";
+    if (_month == "July") _month = "july";
+    if (_month == "August") _month = "august";
+    if (_month == "September") _month = "september";
+    if (_month == "October") _month = "october";
+    if (_month == "November") _month = "november";
+    if (_month == "December") _month = "december";
 
-  OrdinalSales(this.year, this.sales);
+    return _month;
+}
+
+
+  void _onEntryAdded(Event event) {
+    setState(() { //anytime a pest is added to firebase, it is added to the pestList and the UI is rebuilt to show the updated list
+      // pestList.add(Pest.fromSnapshot(event.snapshot));
+    });
+  }
+
+  void _onEntryChanged(Event event) {
+//    var oldEntry = pestList.singleWhere((entry) { //get old key (firebase key for a post)
+//      return entry.key == event.snapshot.key;
+//    });
+//
+//    setState(() {
+//      pestList[pestList.indexOf(oldEntry)] =
+//          Pest.fromSnapshot(event.snapshot);
+//    });
+  }
+
+}
+
+// Date ending and price of a particular week (one bar on bar chart)
+class Data {
+  final String _date;
+  final double _price;
+  Data(this._date, this._price);
+
+  String getDate(){
+    return _date;
+  }
 }
