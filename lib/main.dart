@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(new MyApp());
 
@@ -18,11 +20,33 @@ class MyAppState extends State<MyApp> {
   DatabaseReference databaseReference;
 
   // Commodity dropdown lists
-  List _commoditiesTT = ["Cassava", "Local dasheen", "Imported dasheen", "Local sweet potato", "Imported sweet potato", "Hot pepper"];
-  List _commoditiesJA = ["Dasheen", "Sweet potato", "Scotch bonnet", "West Indian red"];
+  List _commoditiesTT = [
+    "Cassava",
+    "Local dasheen",
+    "Imported dasheen",
+    "Local sweet potato",
+    "Imported sweet potato",
+    "Hot pepper"
+  ];
+  List _commoditiesJA = [
+    "Dasheen", "Sweet potato", "Scotch bonnet", "West Indian red"];
   List _commoditiesBB = ["Cassava", "Sweet potato", "Hot pepper"];
   List _commoditiesGY = ["Cassava", "Sweet potato", "Hot pepper"];
-  List _months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October","November", "December"];
+  List _months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+
   List<DropdownMenuItem<String>> _dropDownMenuBB;
   List<DropdownMenuItem<String>> _dropDownMenuGY;
   List<DropdownMenuItem<String>> _dropDownMenuTT;
@@ -41,7 +65,6 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-
     // Dropdowns
     _dropDownMenuBB = buildAndGetDropDownMenuItems(_commoditiesBB);
     _dropDownMenuTT = buildAndGetDropDownMenuItems(_commoditiesTT);
@@ -59,9 +82,11 @@ class MyAppState extends State<MyApp> {
 
     // Database
     database.setPersistenceEnabled(true);
-    database.setPersistenceCacheSizeBytes(10000000); //allocating 10MB of storage in cache for pest Data
+    database.setPersistenceCacheSizeBytes(
+        10000000); //allocating 10MB of storage in cache
     databaseReference = database.reference();
-    databaseReference.onChildAdded.listen(_onEntryAdded); //listening for new data added
+    databaseReference.onChildAdded.listen(
+        _onEntryAdded); //listening for new data added
     databaseReference.onChildChanged.listen(_onEntryChanged);
 
     super.initState();
@@ -111,32 +136,37 @@ class MyAppState extends State<MyApp> {
       _selectedCommodityBB = selectedCommodity;
     });
   }
+
   void changedDropDownItemGY(String selectedCommodity) {
     setState(() {
       _selectedCommodityGY = selectedCommodity;
     });
   }
+
   void changedDropDownItemJA(String selectedCommodity) {
     setState(() {
       _selectedCommodityJA = selectedCommodity;
     });
   }
-  // End of functions for dropdowns
 
+  // End of functions for dropdowns
 
 
   @override
   Widget build(BuildContext context) {
-    chartTT = charts.BarChart(_createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT), animate: true,);
+    chartTT = charts.BarChart(
+      _createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT),
+      animate: true,);
 
-      return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: DefaultTabController(
-          length: 4,
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: DefaultTabController(
+          length: 5,
           child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
                 tabs: [
+                  Tab(icon: Icon(Icons.home, color: Colors.green,)),
                   Tab(icon: Image.asset("assets/tt_flag.png")),
                   Tab(icon: Image.asset("assets/bb_flag.png")),
                   Tab(icon: Image.asset("assets/gy_flag.png")),
@@ -144,13 +174,57 @@ class MyAppState extends State<MyApp> {
                 ],
               ),
               leading: Image.asset("assets/logo.png"),
-              title: Text('MARKET ANALYSIS', style: TextStyle(color: Colors.green),),
+              title: Text(
+                'MARKET ANALYSIS', style: TextStyle(color: Colors.green),),
               centerTitle: true,
               backgroundColor: Colors.white,
             ),
 
-            body: TabBarView(
+            body:
+            TabBarView(
               children: [
+                //Tab 1 Home
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Center(
+                  child: Container(
+                    color: Colors.white,
+                    child: Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset("assets/logo.png", scale: 1.5,),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("Welcome to CARDI Market App!", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("This application displays the prices of various commodities accross four Caribbean countries for the year 2019",
+                                        style: TextStyle(fontSize: 17.0),),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("Begin by selecting a country from the tabs above. Then use the dropdown buttons to select a commodity and month to view a graph with price data",
+                              style: TextStyle(fontSize: 17.0),),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("Please click below for data from previous years. Note: You will be redirected to the CARDI website.",
+                              style: TextStyle(fontSize: 17.0),),
+                          ),
+                          FlatButton(
+                          onPressed: _launchURL,
+                            child: Text('Archives',
+                                style: TextStyle(fontSize: 17.0, color: Colors.lightBlue)),
+                          ),
+                        ],
+                    ),
+                  ),
+                  ),
+                ),
+
                 // Tab 1 TT
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -175,13 +249,31 @@ class MyAppState extends State<MyApp> {
                                   onChanged: changedDropDownItemMonthTT,
                                 ),
                               ),
+                              //new RaisedButton(onPressed: _loadChartTT , child: Text("Load")),
                             ],
                           ),
                           Expanded(
                             // child: charts.BarChart(_createSampleData(), animate: true),
-                            child: charts.BarChart(_createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT), animate: true,),
+                            // child: charts.BarChart(_createChartTT("trinidad&tobago", _selectedCommodityTT, _selectedMonthTT), animate: true,),
+                            child: charts.BarChart(
+                              _loadChartTT(), animate: true,),
                           ),
                           Text("Currency: \$TTD"),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("Cassava prices were an average of \$5TTD per pound. In December 2018, it was \$4.50TTD per pound",
+                            style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold), textAlign: TextAlign.center, ),
+                          ),
+//                          ListView.builder(
+//                              padding: const EdgeInsets.all(8.0),
+//                              itemCount: _months.length,
+//                              itemBuilder: (BuildContext context, int index) {
+//                                return Container(
+//                                  height: 50,
+//                                  child: Center(child: Text('${_months[index]}')),
+//                                );
+//                              }
+//                          ),
                         ],
                       ),
                     ),
@@ -216,7 +308,9 @@ class MyAppState extends State<MyApp> {
                           ),
                           Expanded(
                             // child: charts.BarChart(_createSampleData(), animate: true),
-                            child: charts.BarChart(_createChartBB("barbados", _selectedCommodityBB, _selectedMonthBB)),
+                            child: charts.BarChart(_createChartBB(
+                                "barbados", _selectedCommodityBB,
+                                _selectedMonthBB)),
                           ),
                           Text("Currency: \$BBD"),
                         ],
@@ -236,11 +330,11 @@ class MyAppState extends State<MyApp> {
                           Row(
                             children: <Widget>[
                               Expanded(
-                              child: new DropdownButton(
-                                value: _selectedCommodityGY,
-                                items: _dropDownMenuGY,
-                                onChanged: changedDropDownItemGY,
-                              ),
+                                child: new DropdownButton(
+                                  value: _selectedCommodityGY,
+                                  items: _dropDownMenuGY,
+                                  onChanged: changedDropDownItemGY,
+                                ),
                               ),
                               Expanded(
                                 child: new DropdownButton(
@@ -253,7 +347,9 @@ class MyAppState extends State<MyApp> {
                           ),
                           Expanded(
 //                            child: charts.BarChart(_createSampleData(), animate: true),
-                              child: charts.BarChart(_createChartGY("guyana", _selectedCommodityGY, _selectedMonthGY)),
+                            child: charts.BarChart(_createChartGY(
+                                "guyana", _selectedCommodityGY,
+                                _selectedMonthGY)),
                           ),
                           Text("Currency: \$GY"),
                         ],
@@ -290,7 +386,9 @@ class MyAppState extends State<MyApp> {
                           ),
                           Expanded(
 //                            child: charts.BarChart(_createSampleData(), animate: true),
-                              child: charts.BarChart(_createChartJA("jamaica", _selectedCommodityJA, _selectedMonthJA)),
+                            child: charts.BarChart(_createChartJA(
+                                "jamaica", _selectedCommodityJA,
+                                _selectedMonthJA)),
                           ),
                           Text("Currency: \$JCA"),
                         ],
@@ -303,12 +401,26 @@ class MyAppState extends State<MyApp> {
             ),
           ),
         )
-      );
+    );
   }
 
+  _launchURL() async {
+    const url = 'http://www.cardi.org';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  _loadChartTT() {
+    return _createChartTT(
+        "trinidad&tobago", _selectedCommodityTT, _selectedMonthTT);
+  }
 
   // Function which takes the name of the country, commodity and month and returns a series to build a chart
-  List<charts.Series<Data, String>> _createChartTT(String _country, String _commodity, String _month) {
+  List<charts.Series<Data, String>> _createChartTT(String _country,
+      String _commodity, String _month) {
     String _date;
     String _price;
     int x;
@@ -317,23 +429,23 @@ class MyAppState extends State<MyApp> {
     _commodity = changeCommodity(_commodity);
     _month = changeMonth(_month);
 
-    for (x=1; x<=5; x++){
+    for (x = 1; x <= 5; x++) {
       // point database to week
-      String _week = "week"+x.toString();
-      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      String _week = "week" + x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity)
+          .child(_month)
+          .child(_week);
       // get snapshot
-      databaseReference.once().then((DataSnapshot snapshot) {
-        if(snapshot.value == null){
+      databaseReference.once()
+          .then((DataSnapshot snapshot) {
+        if (snapshot.value == null) {
           _date = "";
           _price = "0.0";
         }
-        else{
-          print('Data : ${snapshot.value}');
+        else {
           _date = snapshot.value['date'];
           _price = snapshot.value['price'];
           dataTT.add(new Data(_date, double.parse(_price)));
-          print(_date);
-          print(_price);
         }
       });
     }
@@ -351,7 +463,8 @@ class MyAppState extends State<MyApp> {
   }
 
   // Function which takes the name of the country, commodity and month and returns a series to build a chart
-  List<charts.Series<Data, String>> _createChartBB(String _country, String _commodity, String _month) {
+  List<charts.Series<Data, String>> _createChartBB(String _country,
+      String _commodity, String _month) {
     String _date;
     String _price;
     int x;
@@ -360,23 +473,22 @@ class MyAppState extends State<MyApp> {
     _commodity = changeCommodity(_commodity);
     _month = changeMonth(_month);
 
-    for (x=1; x<=5; x++){
+    for (x = 1; x <= 5; x++) {
       // point database to week
-      String _week = "week"+x.toString();
-      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      String _week = "week" + x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity)
+          .child(_month)
+          .child(_week);
       // get snapshot
       databaseReference.once().then((DataSnapshot snapshot) {
-        if(snapshot.value == null){
+        if (snapshot.value == null) {
           _date = "";
           _price = "0.0";
         }
-        else{
-          print('Data : ${snapshot.value}');
+        else {
           _date = snapshot.value['date'];
           _price = snapshot.value['price'];
           dataBB.add(new Data(_date, double.parse(_price)));
-          print(_date);
-          print(_price);
         }
       });
     }
@@ -394,7 +506,8 @@ class MyAppState extends State<MyApp> {
   }
 
   // Function which takes the name of the country, commodity and month and returns a series to build a chart
-  List<charts.Series<Data, String>> _createChartGY(String _country, String _commodity, String _month) {
+  List<charts.Series<Data, String>> _createChartGY(String _country,
+      String _commodity, String _month) {
     String _date;
     String _price;
     int x;
@@ -403,23 +516,22 @@ class MyAppState extends State<MyApp> {
     _commodity = changeCommodity(_commodity);
     _month = changeMonth(_month);
 
-    for (x=1; x<=5; x++){
+    for (x = 1; x <= 5; x++) {
       // point database to week
-      String _week = "week"+x.toString();
-      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      String _week = "week" + x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity)
+          .child(_month)
+          .child(_week);
       // get snapshot
       databaseReference.once().then((DataSnapshot snapshot) {
-        if(snapshot.value == null){
+        if (snapshot.value == null) {
           _date = "";
           _price = "0.0";
         }
-        else{
-          print('Data : ${snapshot.value}');
+        else {
           _date = snapshot.value['date'];
           _price = snapshot.value['price'];
           dataGY.add(new Data(_date, double.parse(_price)));
-          print(_date);
-          print(_price);
         }
       });
     }
@@ -437,7 +549,8 @@ class MyAppState extends State<MyApp> {
   }
 
   // Function which takes the name of the country, commodity and month and returns a series to build a chart
-  List<charts.Series<Data, String>> _createChartJA(String _country, String _commodity, String _month) {
+  List<charts.Series<Data, String>> _createChartJA(String _country,
+      String _commodity, String _month) {
     String _date;
     String _price;
     int x;
@@ -446,23 +559,22 @@ class MyAppState extends State<MyApp> {
     _commodity = changeCommodity(_commodity);
     _month = changeMonth(_month);
 
-    for (x=1; x<=5; x++){
+    for (x = 1; x <= 5; x++) {
       // point database to week
-      String _week = "week"+x.toString();
-      databaseReference = database.reference().child(_country).child(_commodity).child(_month).child(_week);
+      String _week = "week" + x.toString();
+      databaseReference = database.reference().child(_country).child(_commodity)
+          .child(_month)
+          .child(_week);
       // get snapshot
       databaseReference.once().then((DataSnapshot snapshot) {
-        if(snapshot.value == null){
+        if (snapshot.value == null) {
           _date = "";
           _price = "0.0";
         }
-        else{
-          print('Data : ${snapshot.value}');
+        else {
           _date = snapshot.value['date'];
           _price = snapshot.value['price'];
           dataJA.add(new Data(_date, double.parse(_price)));
-          print(_date);
-          print(_price);
         }
       });
     }
@@ -479,23 +591,23 @@ class MyAppState extends State<MyApp> {
     ];
   }
 
-String changeCommodity(String _commodity){
-  // match commodity name to value stored in database
-  if (_commodity == "Cassava") _commodity = "cassava";
-  if (_commodity == "Local dasheen") _commodity = "dasheen";
-  if (_commodity == "Imported dasheen") _commodity = "dasheen1";
-  if (_commodity == "Local sweet potato") _commodity = "sweetPotato";
-  if (_commodity == "Imported sweet potato") _commodity = "sweetPotato1";
-  if (_commodity == "Sweet potato") _commodity = "sweetPotato";
-  if (_commodity == "Dasheen") _commodity = "dasheen";
-  if (_commodity == "Hot pepper") _commodity = "hotPeppers";
-  if (_commodity == "Scotch bonnet") _commodity = "scotchBonnet";
-  if (_commodity == "West Indian red") _commodity = "westIndianRed";
+  String changeCommodity(String _commodity) {
+    // match commodity name to value stored in database
+    if (_commodity == "Cassava") _commodity = "cassava";
+    if (_commodity == "Local dasheen") _commodity = "dasheen";
+    if (_commodity == "Imported dasheen") _commodity = "dasheen1";
+    if (_commodity == "Local sweet potato") _commodity = "sweetPotato";
+    if (_commodity == "Imported sweet potato") _commodity = "sweetPotato1";
+    if (_commodity == "Sweet potato") _commodity = "sweetPotato";
+    if (_commodity == "Dasheen") _commodity = "dasheen";
+    if (_commodity == "Hot pepper") _commodity = "hotPeppers";
+    if (_commodity == "Scotch bonnet") _commodity = "scotchBonnet";
+    if (_commodity == "West Indian red") _commodity = "westIndianRed";
 
-  return _commodity;
-}
+    return _commodity;
+  }
 
-String changeMonth(String _month){
+  String changeMonth(String _month) {
     if (_month == "January") _month = "january";
     if (_month == "February") _month = "february";
     if (_month == "March") _month = "march";
@@ -510,7 +622,7 @@ String changeMonth(String _month){
     if (_month == "December") _month = "december";
 
     return _month;
-}
+  }
 
 
   void _onEntryAdded(Event event) {
@@ -529,7 +641,6 @@ String changeMonth(String _month){
 //          Pest.fromSnapshot(event.snapshot);
 //    });
   }
-
 }
 
 // Date ending and price of a particular week (one bar on bar chart)
