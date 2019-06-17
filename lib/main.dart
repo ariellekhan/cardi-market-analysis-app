@@ -18,6 +18,7 @@ class MyAppState extends State<MyApp> {
   // Realtime database
   final FirebaseDatabase database = FirebaseDatabase.instance;
   DatabaseReference databaseReference;
+  DatabaseReference dbRef;
 
   // Commodity dropdown lists
   List _commoditiesTT = [
@@ -88,6 +89,11 @@ class MyAppState extends State<MyApp> {
     databaseReference.onChildAdded.listen(
         _onEntryAdded); //listening for new data added
     databaseReference.onChildChanged.listen(_onEntryChanged);
+
+    dbRef = database.reference();
+    dbRef.onChildAdded.listen(
+        _onEntryAdded); //listening for new data added
+    dbRef.onChildChanged.listen(_onEntryChanged);
 
     super.initState();
   }
@@ -249,7 +255,6 @@ class MyAppState extends State<MyApp> {
                                   onChanged: changedDropDownItemMonthTT,
                                 ),
                               ),
-                              //new RaisedButton(onPressed: _loadChartTT , child: Text("Load")),
                             ],
                           ),
                           Expanded(
@@ -261,19 +266,9 @@ class MyAppState extends State<MyApp> {
                           Text("Currency: \$TTD"),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("Cassava prices were an average of \$5TTD per pound. In December 2018, it was \$4.50TTD per pound",
+                            child: Text("Cassava prices were an average of \$7.56TTD per pound. In December 2018, it was an average of \$6.90TTD per pound",
                             style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold), textAlign: TextAlign.center, ),
                           ),
-//                          ListView.builder(
-//                              padding: const EdgeInsets.all(8.0),
-//                              itemCount: _months.length,
-//                              itemBuilder: (BuildContext context, int index) {
-//                                return Container(
-//                                  height: 50,
-//                                  child: Center(child: Text('${_months[index]}')),
-//                                );
-//                              }
-//                          ),
                         ],
                       ),
                     ),
@@ -313,6 +308,10 @@ class MyAppState extends State<MyApp> {
                                 _selectedMonthBB)),
                           ),
                           Text("Currency: \$BBD"),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(_getDescription("barbados", _selectedCommodityBB, _selectedMonthBB).getDesc()),
+                          ),
                         ],
                       ),
                     ),
@@ -443,9 +442,9 @@ class MyAppState extends State<MyApp> {
           _price = "0.0";
         }
         else {
-          _date = snapshot.value['date'];
+          _date = _week;
           _price = snapshot.value['price'];
-          dataTT.add(new Data(_date, double.parse(_price)));
+          dataTT.add(new Data(_date, double.parse(_price), ""));
         }
       });
     }
@@ -486,9 +485,9 @@ class MyAppState extends State<MyApp> {
           _price = "0.0";
         }
         else {
-          _date = snapshot.value['date'];
+          _date = _week;
           _price = snapshot.value['price'];
-          dataBB.add(new Data(_date, double.parse(_price)));
+          dataBB.add(new Data(_date, double.parse(_price), ""));
         }
       });
     }
@@ -529,9 +528,9 @@ class MyAppState extends State<MyApp> {
           _price = "0.0";
         }
         else {
-          _date = snapshot.value['date'];
+          _date = _week ;
           _price = snapshot.value['price'];
-          dataGY.add(new Data(_date, double.parse(_price)));
+          dataGY.add(new Data(_date, double.parse(_price), ""));
         }
       });
     }
@@ -572,9 +571,9 @@ class MyAppState extends State<MyApp> {
           _price = "0.0";
         }
         else {
-          _date = snapshot.value['date'];
+          _date = _week;
           _price = snapshot.value['price'];
-          dataJA.add(new Data(_date, double.parse(_price)));
+          dataJA.add(new Data(_date, double.parse(_price), ""));
         }
       });
     }
@@ -590,6 +589,31 @@ class MyAppState extends State<MyApp> {
       )
     ];
   }
+
+
+  // toDo
+  // NOT WORKING!!! POSSIBLY USE STREAM BUILDER
+  // DATA IS BEING PULLED FROM FIREBASE BUT NOT RETURNED
+  // Function which takes the name of the country, commodity and month and returns a description
+  Data _getDescription(String _country, String _commodity, String _month) {
+    String _description = "No description available";
+    _commodity = changeCommodity(_commodity);
+    _month = changeMonth(_month);
+    Data d = new Data("", 0.0, _description);
+
+    dbRef = database.reference().child(_country).child(_commodity).child(_month).child("description");
+      // get snapshot
+    dbRef.once().then((DataSnapshot snapshot) {
+      if(snapshot.value!= null)
+        _description = snapshot.value;
+         d = new Data("", 0.0, _description);
+         print (d.getDesc()); // correct description !!!
+    });
+
+    print(d.getDesc()); // initialized description !!!
+    return d;
+  }
+
 
   String changeCommodity(String _commodity) {
     // match commodity name to value stored in database
@@ -647,9 +671,16 @@ class MyAppState extends State<MyApp> {
 class Data {
   final String _date;
   final double _price;
-  Data(this._date, this._price);
+  final String _description;
+
+  Data(this._date, this._price, this._description);
 
   String getDate(){
     return _date;
   }
+
+  String getDesc(){
+    return _description;
+  }
+
 }
