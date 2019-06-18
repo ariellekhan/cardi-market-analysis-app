@@ -199,20 +199,20 @@ class MyAppState extends State<MyApp> {
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Image.asset("assets/logo.png", scale: 1.5,),
+                            child: Image.asset("assets/logo.png", scale: 3,),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("Welcome to CARDI Market App!", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
+                            child: Text("CARDI Market Price Bulletin", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("This application displays the prices of various commodities accross four Caribbean countries for the year 2019",
+                            child: Text("This market price bulletin from the Caribbean Agricultural Research and Development Institute (CARDI) tracks wholesale prices each month for selected root crops (cassava, dasheen, sweet potato) and hot peppers from four regional markets, Barbados, Jamaica, Guyana and Trinidad & Tobago, as well as the Miami Terminal Market.(hot peppers)",
                                         style: TextStyle(fontSize: 17.0),),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("Begin by selecting a country from the tabs above. Then use the dropdown buttons to select a commodity and month to view a graph with price data",
+                            child: Text("Other features are previous month’s prices and a price tracker which shows the monthly trends in prices. This information is intended to serve value chain stakeholders (producers, traders, retailers and exporters) across the Region.",
                               style: TextStyle(fontSize: 17.0),),
                           ),
                           Padding(
